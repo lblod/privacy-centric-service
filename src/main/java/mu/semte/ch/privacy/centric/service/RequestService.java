@@ -15,6 +15,7 @@ import mu.semte.ch.privacy.centric.jsonapi.Nationality;
 import mu.semte.ch.privacy.centric.jsonapi.PersonInformationAsk;
 import mu.semte.ch.privacy.centric.jsonapi.PersonInformationRequest;
 import mu.semte.ch.privacy.centric.jsonapi.PersonInformationUpdate;
+import mu.semte.ch.privacy.centric.jsonapi.ValidateSsn;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.RDFNode;
@@ -94,8 +95,12 @@ public class RequestService {
       }
     }
 
-    if (isNotEmpty(updateRequest.getRegistrationNumber())) {
-      parameters.put("registration", updateRequest.getRegistrationNumber());
+    String registrationNumber = updateRequest.getRegistrationNumber();
+    if (isNotEmpty(registrationNumber)) {
+      if (!validateSsn(personId, registrationNumber)) {
+        throw new RuntimeException("Registration number '%s' doesn't belong to person with id '%s'".formatted(registrationNumber, personId));
+      }
+      parameters.put("registration", registrationNumber);
     }
     if (isNotEmpty(updateRequest.getDateOfBirth())) {
       parameters.put("dateOfBirth", updateRequest.getDateOfBirth());
@@ -248,4 +253,22 @@ public class RequestService {
     });
   }
 
+
+  @SneakyThrows
+  public String validateSsn(String personId, String ssn, String sessionId) {
+    String accountUri = getAccountBySession(sessionId);
+    checkNotNull(accountUri, "Account must be set!");
+    checkNotNull(personId, "Person id must be set!");
+    checkArgument(isNotEmpty(personId), "Person id must be set!");
+    checkArgument(isNotEmpty(ssn), "SSN must be set!");
+    byte[] responseBytes = resourceConverter.writeDocument(new JSONAPIDocument<>(ValidateSsn.builder()
+                                                                                            .isValid(validateSsn(personId, ssn))
+                                                                                            .build()));
+    return new String(responseBytes);
+  }
+
+  private boolean validateSsn(String personId, String ssn) {
+    var query = queryStore.getQueryWithParameters("askSsn", Map.of("personId", personId, "ssn", ssn, "graph", graph));
+    return sparqlClient.executeAskQuery(query);
+  }
 }

@@ -10,6 +10,7 @@ import mu.semte.ch.privacy.centric.jsonapi.PersonInformationAsk;
 import mu.semte.ch.privacy.centric.jsonapi.PersonInformationRequest;
 import mu.semte.ch.privacy.centric.jsonapi.PersonInformationUpdate;
 import mu.semte.ch.privacy.centric.jsonapi.RequestReason;
+import mu.semte.ch.privacy.centric.jsonapi.ValidateSsn;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +30,7 @@ public class ApplicationConfig {
                                  Gender.class, Nationality.class, Person.class, PersonInformationUpdate.class,
                                  PersonInformationRequest.class,
                                  PersonInformationAsk.class,
+                                 ValidateSsn.class,
                                  RequestReason.class);
   }
 

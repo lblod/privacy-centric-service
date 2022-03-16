@@ -1,4 +1,4 @@
-FROM maven:3.6.3-amazoncorretto-15 as builder
+FROM maven:3.8.4-openjdk-17 as builder
 LABEL maintainer="info@redpencil.io"
 
 WORKDIR /app
@@ -15,7 +15,7 @@ COPY ./src ./src
 
 RUN mvn package -DskipTests
 
-FROM amazoncorretto:15
+FROM eclipse-temurin:17.0.2_8-jre
 
 WORKDIR /app
 

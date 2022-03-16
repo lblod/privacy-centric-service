@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,9 +39,18 @@ public class AppController {
     return ResponseEntity.ok(requestService.processRead(payload, getSessionIdHeader(request)));
   }
 
+  @PostMapping(value = "/person-information-validate-ssn/{personId}",
+               consumes = "application/vnd.api+json",
+               produces = "application/vnd.api+json")
+  public ResponseEntity<String> validateSsn(@PathVariable("personId") String personId,
+                                            @RequestParam("ssn") String ssn,
+                                            HttpServletRequest request) {
+    return ResponseEntity.ok(requestService.validateSsn(personId, ssn, getSessionIdHeader(request)));
+  }
+
   @PostMapping(value = "/person-information-ask/{personId}",
                produces = "application/vnd.api+json")
-  public ResponseEntity<String> checkPersonInfo(@PathVariable("personId") String personId, HttpServletRequest request) {
+  public ResponseEntity<String> askPersonInfo(@PathVariable("personId") String personId, HttpServletRequest request) {
     return ResponseEntity.ok(requestService.processCheckPersonInfo(personId, getSessionIdHeader(request)));
   }
 
