@@ -269,6 +269,6 @@ public class RequestService {
 
   private boolean validateSsn(String personId, String ssn) {
     var query = queryStore.getQueryWithParameters("askSsn", Map.of("personId", personId, "ssn", ssn, "graph", graph));
-    return sparqlClient.executeAskQuery(query);
+    return !sparqlClient.executeAskQuery(query);
   }
 }
