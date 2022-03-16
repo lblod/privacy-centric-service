@@ -106,6 +106,12 @@ public class RequestService {
       parameters.put("dateOfBirth", updateRequest.getDateOfBirth());
     }
 
+    var deleteDataPerson = queryStore.getQueryWithParameters("deleteDataPerson", Map.of(
+            "personId", personId,
+            "graph", graph
+    ));
+    sparqlClient.executeUpdateQuery(deleteDataPerson);
+
     if (!parameters.isEmpty()) {
       String reasonUri = getReasonUri(reasonId);
       parameters.put("personId", personId);
@@ -113,8 +119,6 @@ public class RequestService {
       parameters.put("time", formattedDate(LocalDateTime.now()));
       parameters.put("accountUri", accountUri);
       parameters.put("code", reasonUri);
-      var deleteDataPerson = queryStore.getQueryWithParameters("deleteDataPerson", parameters);
-      sparqlClient.executeUpdateQuery(deleteDataPerson);
       var insertDataPerson = queryStore.getQueryWithParameters("insertDataPerson", parameters);
       sparqlClient.executeUpdateQuery(insertDataPerson);
     }

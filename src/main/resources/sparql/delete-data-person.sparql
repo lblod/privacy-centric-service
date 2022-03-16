@@ -7,56 +7,40 @@ PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
 
 DELETE {
   GRAPH <${graph}> {
-    <#if dateOfBirth?has_content>
       <http://data.lblod.info/id/personen/${personId}> persoon:heeftGeboorte ?heeftGeboorte.
       ?heeftGeboorte ?p ?o.
-    </#if>
 
-    <#if registration?has_content>
        <http://data.lblod.info/id/personen/${personId}>  <https://data.vlaanderen.be/ns/persoon#registratie> ?registration.
        ?registration <https://data.vlaanderen.be/ns/generiek#gestructureerdeIdentificator> ?identificator.
        ?identificator ?x ?y.
        ?registration ?t ?j.
-    </#if>
 
-    <#if gender?has_content>
        <http://data.lblod.info/id/personen/${personId}>  <https://data.vlaanderen.be/ns/persoon#geslacht> ?geslacht.
-    </#if>
 
-    <#if nationaliteits?has_content>
        <http://data.lblod.info/id/personen/${personId}>  <https://data.vlaanderen.be/ns/persoon#heeftNationaliteit> ?nationaliteit.
-    </#if>
   }
 }
 WHERE  {
   GRAPH <${graph}> {
-    <#if dateOfBirth?has_content>
       optional {
         <http://data.lblod.info/id/personen/${personId}> persoon:heeftGeboorte  ?heeftGeboorte.
         ?heeftGeboorte ?p ?o.
       }
-    </#if>
 
-    <#if registration?has_content>
       optional {
         <http://data.lblod.info/id/personen/${personId}>  <https://data.vlaanderen.be/ns/persoon#registratie> ?registration.
         ?registration <https://data.vlaanderen.be/ns/generiek#gestructureerdeIdentificator> ?identificator.
         ?identificator ?x ?y.
         ?registration ?t ?j.
       }
-    </#if>
 
-      <#if gender?has_content>
         optional {
           <http://data.lblod.info/id/personen/${personId}>  <https://data.vlaanderen.be/ns/persoon#geslacht> ?geslacht.
         }
-      </#if>
 
-      <#if nationaliteits?has_content>
         optional {
           <http://data.lblod.info/id/personen/${personId}>  <https://data.vlaanderen.be/ns/persoon#heeftNationaliteit> ?nationaliteit.
         }
-      </#if>
   }
 
 }
