@@ -51,6 +51,12 @@ http://localhost/person-information-requests
              }
           }
 ```
+### Validate SSN (POST):
+http://localhost/person-information-validate-ssn/{personId}?ssn=${ssn}
+
+`Accept: application/vnd.api+json`
+
+`Content-Type: application/vnd.api+json`
 
 ### Update (POST):
 
