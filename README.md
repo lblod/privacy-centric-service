@@ -11,13 +11,11 @@ This has impact on the implementation for the screens which contain sensitive da
 
 ```
   privacy:
-    image: lblod/privacy-centric-service:0.0.1
+    image: lblod/privacy-centric-service:0.5.0
     environment:
-      SERVER_PORT: "80"
-      SPARQL_ENDPOINT: "http://db:8890/sparql"
-      LOGGING_LEVEL: "INFO"
-      DEFAULT_GRAPH: "http://mu.semte.ch/graphs/contacthub/141d9d6b-54af-4d17-b313-8d1c30bc3f5b/ChAdmin"
+      DEFAULT_GRAPH: "http://mu.semte.ch/graphs/privacy-centric-graph"
       SESSION_GRAPH: "http://mu.semte.ch/graphs/sessions"
+      APP_GRAPH: "http://mu.semte.ch/graphs/organisatieportaal"
 ```
 
 ## Example request
