@@ -16,6 +16,8 @@ This has impact on the implementation for the screens which contain sensitive da
       DEFAULT_GRAPH: "http://mu.semte.ch/graphs/privacy-centric-graph"
       SESSION_GRAPH: "http://mu.semte.ch/graphs/sessions"
       APP_GRAPH: "http://mu.semte.ch/graphs/organisatieportaal"
+    links:
+      - db:database
 ```
 
 ## Example request

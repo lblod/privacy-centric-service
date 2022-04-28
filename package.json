@@ -1,12 +1,12 @@
 {
   "name": "privacy-centric-service",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.5.0",
+  "description": "supply a reason when reading or updating person's sensitive information",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Nordine Bittich",
   "license": "MIT",
   "dependencies": {
     "@lblod/mu-auth-sudo": "^0.5.1",
