@@ -74,36 +74,36 @@ export class RequestService {
           parameters.gender = genderUri;
         }
       }
-      if (registrationNumber?.length) {
-        if (!(await this.validateRn(personId, registrationNumber))) {
-          throw Error(
-            `Registration number '${registrationNumber}' doesn't belong to person with id '${personId}'`
-          );
-        }
-        parameters.registration = registrationNumber;
-      }
-      if (dateOfBirth?.length) {
-        parameters.dateOfBirth = dateOfBirth;
-      }
-
-      let deleteDataPersonQuery = deleteDataPerson(DEFAULT_GRAPH_URI, personId);
-
-      await update(deleteDataPersonQuery);
-
-      if (Object.keys(parameters).length !== 0) {
-        let reasonUri = await this.getReasonUri(reasonId);
-        let insertDataPersonQuery = insertDataPerson(
-          DEFAULT_GRAPH_URI,
-          accountUri,
-          personId,
-          reasonUri,
-          parameters.dateOfBirth,
-          parameters.registration,
-          parameters.gender,
-          parameters.nationalities
+    }
+    if (registrationNumber?.length) {
+      if (!(await this.validateRn(personId, registrationNumber))) {
+        throw Error(
+          `Registration number '${registrationNumber}' doesn't belong to person with id '${personId}'`
         );
-        await update(insertDataPersonQuery);
       }
+      parameters.registration = registrationNumber;
+    }
+    if (dateOfBirth?.length) {
+      parameters.dateOfBirth = dateOfBirth;
+    }
+
+    let deleteDataPersonQuery = deleteDataPerson(DEFAULT_GRAPH_URI, personId);
+
+    await update(deleteDataPersonQuery);
+
+    if (Object.keys(parameters).length !== 0) {
+      let reasonUri = await this.getReasonUri(reasonId);
+      let insertDataPersonQuery = insertDataPerson(
+        DEFAULT_GRAPH_URI,
+        accountUri,
+        personId,
+        reasonUri,
+        parameters.dateOfBirth,
+        parameters.registration,
+        parameters.gender,
+        parameters.nationalities
+      );
+      await update(insertDataPersonQuery);
     }
   }
 
@@ -123,7 +123,7 @@ export class RequestService {
     }
     if (responseBuilder.nationalities?.length) {
       responseBuilder.nationalities = responseBuilder.nationalities.map(
-        (n) => "**********"
+        (_n) => "**********"
       );
     }
     responseBuilder.type = "person-information-asks";
@@ -303,18 +303,17 @@ export class RequestService {
     }
     let nationalitiesRelationship = null;
     if (responseBuilder.nationalities?.length) {
-      let nationalityJsonApi =     responseBuilder.nationalities
-      .map((nationality) => {
-        return `
+      let nationalityJsonApi = responseBuilder.nationalities
+        .map((nationality) => {
+          return `
           {
             "type": "nationalities",
             "id": "${nationality}"
           }
     `;
-      })
-      .join(",");
-      nationalitiesRelationship =
-        `"nationalities":{
+        })
+        .join(",");
+      nationalitiesRelationship = `"nationalities":{
             "data" : [
               ${nationalityJsonApi}
             ]
