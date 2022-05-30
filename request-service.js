@@ -87,11 +87,11 @@ export class RequestService {
       parameters.dateOfBirth = dateOfBirth;
     }
 
-    let deleteDataPersonQuery = deleteDataPerson(DEFAULT_GRAPH_URI, personId);
-
-    await update(deleteDataPersonQuery);
-
     if (Object.keys(parameters).length !== 0) {
+      let deleteDataPersonQuery = deleteDataPerson(DEFAULT_GRAPH_URI, personId);
+
+      await update(deleteDataPersonQuery);
+
       let reasonUri = await this.getReasonUri(reasonId);
       let insertDataPersonQuery = insertDataPerson(
         DEFAULT_GRAPH_URI,
