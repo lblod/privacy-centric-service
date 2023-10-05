@@ -4,6 +4,7 @@ import {
   sparqlEscapeDate,
   sparqlEscapeString,
 } from "mu";
+
 const PREFIXES = `
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
@@ -25,12 +26,12 @@ export function askSsn(graph, ssn, personId) {
           ?person persoon:registratie ?registrationId.
         }
         graph ?g {
-           ?person a ?type;
-                   mu:uuid ?id.
+          ?person a ?type;
+            mu:uuid ?id.
         }
-         FILTER(?lokaleIdentificator = ${sparqlEscapeString(
-           ssn
-         )} && ?type = person:Person && ?id != ${sparqlEscapeString(
+        FILTER(?lokaleIdentificator = ${sparqlEscapeString(
+          ssn
+        )} && ?type = person:Person && ?id != ${sparqlEscapeString(
     personId
   )}) .
       
@@ -44,60 +45,43 @@ export function deleteDataPerson(graph, personId) {
       
     DELETE {
       GRAPH ${sparqlEscapeUri(graph)} {
-          ${sparqlEscapeUri(
-            `http://data.lblod.info/id/personen/${personId}`
-          )} persoon:heeftGeboorte ?heeftGeboorte.
-          ?heeftGeboorte ?p ?o.
+        ?person persoon:heeftGeboorte ?heeftGeboorte.
+        ?heeftGeboorte ?p ?o.
 
-          ${sparqlEscapeUri(
-            `http://data.lblod.info/id/personen/${personId}`
-          )}  persoon:registratie ?registration.
+        ?person persoon:registratie ?registration.
+        ?registration <https://data.vlaanderen.be/ns/generiek#gestructureerdeIdentificator> ?identificator.
+        ?identificator ?x ?y.
+        ?registration ?t ?j.
+
+        ?person persoon:geslacht ?geslacht.
+
+        ?person persoon:heeftNationaliteit ?nationaliteit.
+      }
+    }
+    WHERE {
+      ?person mu:uuid ${sparqlEscapeString(personId)} .
+      GRAPH ${sparqlEscapeUri(graph)} {
+        optional {
+          ?person persoon:heeftGeboorte ?heeftGeboorte.
+          ?heeftGeboorte ?p ?o.
+        }
+
+        optional {
+          ?person persoon:registratie ?registration.
           ?registration <https://data.vlaanderen.be/ns/generiek#gestructureerdeIdentificator> ?identificator.
           ?identificator ?x ?y.
           ?registration ?t ?j.
+        }
 
-          ${sparqlEscapeUri(
-            `http://data.lblod.info/id/personen/${personId}`
-          )}  persoon:geslacht ?geslacht.
+        optional {
+          ?person persoon:geslacht ?geslacht.
+        }
 
-          ${sparqlEscapeUri(
-            `http://data.lblod.info/id/personen/${personId}`
-          )}  persoon:heeftNationaliteit ?nationaliteit.
+        optional {
+          ?person  persoon:heeftNationaliteit ?nationaliteit.
+        }
       }
     }
-    WHERE  {
-      GRAPH ${sparqlEscapeUri(graph)} {
-          optional {
-            ${sparqlEscapeUri(
-              `http://data.lblod.info/id/personen/${personId}`
-            )} persoon:heeftGeboorte  ?heeftGeboorte.
-            ?heeftGeboorte ?p ?o.
-          }
-
-          optional {
-            ${sparqlEscapeUri(
-              `http://data.lblod.info/id/personen/${personId}`
-            )}  persoon:registratie ?registration.
-            ?registration <https://data.vlaanderen.be/ns/generiek#gestructureerdeIdentificator> ?identificator.
-            ?identificator ?x ?y.
-            ?registration ?t ?j.
-          }
-
-            optional {
-              ${sparqlEscapeUri(
-                `http://data.lblod.info/id/personen/${personId}`
-              )}  persoon:geslacht ?geslacht.
-            }
-
-            optional {
-              ${sparqlEscapeUri(
-                `http://data.lblod.info/id/personen/${personId}`
-              )}  persoon:heeftNationaliteit ?nationaliteit.
-            }
-      }
-
-    }
-  
   `;
 }
 
@@ -122,6 +106,7 @@ export function getGenderById(genderId) {
     }
   `;
 }
+
 export function getNationalityById(nationalityId) {
   return `
     ${PREFIXES}
@@ -131,54 +116,70 @@ export function getNationalityById(nationalityId) {
     
   `;
 }
-export function getPersonInfo(graph, appGraph, personId) {
+
+export function getPersonBirth(graph, appGraph, personId) {
   return `
     ${PREFIXES}
-    select ?dateOfBirth ?registrationNumber ?genderId where {
+    select distinct ?dateOfBirth ?registrationNumber ?genderId where {
+      ?person mu:uuid ${sparqlEscapeString(personId)} .
       graph ${sparqlEscapeUri(graph)} {
         optional {
-           ${sparqlEscapeUri(
-             `http://data.lblod.info/id/personen/${personId}`
-           )} persoon:geslacht ?geslacht.
-          graph ${sparqlEscapeUri(appGraph)} {
-             ?geslacht mu:uuid ?genderId.
-          }
-        }
-        optional {
-           ${sparqlEscapeUri(
-             `http://data.lblod.info/id/personen/${personId}`
-           )} persoon:heeftGeboorte ?heeftGeboorte.
+          ?person persoon:heeftGeboorte ?heeftGeboorte.
           ?heeftGeboorte persoon:datum ?dateOfBirth.
         }
+      }
+    }
+  `;
+}
+
+export function getPersonRegistrationNumber(graph, appGraph, personId) {
+  return `
+    ${PREFIXES}
+    select distinct ?dateOfBirth ?registrationNumber ?genderId where {
+      ?person mu:uuid ${sparqlEscapeString(personId)} .
+      graph ${sparqlEscapeUri(graph)} {
         optional {
-           ${sparqlEscapeUri(
-             `http://data.lblod.info/id/personen/${personId}`
-           )}  persoon:registratie ?registratie.
+          ?person persoon:registratie ?registratie.
           ?registratie <https://data.vlaanderen.be/ns/generiek#gestructureerdeIdentificator> ?identificator.
           ?identificator<https://data.vlaanderen.be/ns/generiek#lokaleIdentificator> ?registrationNumber.
         }
       }
-      
-      }
-    
+    }
   `;
 }
+
+export function getPersonGender(graph, appGraph, personId) {
+  return `
+    ${PREFIXES}
+    select distinct ?genderId where {
+      ?person mu:uuid ${sparqlEscapeString(personId)} .
+      graph ${sparqlEscapeUri(graph)} {
+        optional {
+          ?person persoon:geslacht ?geslacht.
+          graph ${sparqlEscapeUri(appGraph)} {
+            ?geslacht mu:uuid ?genderId.
+          }
+        }
+      }
+    }
+  `;
+}
+
 export function getPersonNationalities(graph, appGraph, personId) {
   return `
     ${PREFIXES}
-    select ?nationaliteitId where {
-      graph ${sparqlEscapeUri(graph)}{
-          ${sparqlEscapeUri(
-            `http://data.lblod.info/id/personen/${personId}`
-          )} persoon:heeftNationaliteit ?nationaliteit.
-        }
-        graph ${sparqlEscapeUri(appGraph)}  {
-             ?nationaliteit mu:uuid ?nationaliteitId.
-        }
+    select distinct ?nationaliteitId where {
+      ?person mu:uuid ${sparqlEscapeString(personId)} .
+      graph ${sparqlEscapeUri(graph)} {
+        ?person persoon:heeftNationaliteit ?nationaliteit.
       }
-    
+      graph ${sparqlEscapeUri(appGraph)}  {
+        ?nationaliteit mu:uuid ?nationaliteitId.
+      }
+    }
   `;
 }
+
 export function getReasonById(reasonId) {
   return `
     ${PREFIXES}
@@ -193,25 +194,25 @@ export function requestReadReason(graph, accountUri, personId, reasonCodeUri) {
   let reasonId = uuid();
   return `
     ${PREFIXES}
-    INSERT DATA {
+    INSERT {
       graph ${sparqlEscapeUri(graph)} {
-            <http://data.lblod.info/id/person-information-reads/${reasonId}>  a ext:PersonInformationRead;
-                                                            mu:uuid "${reasonId}";
-                                                            ext:date "${now}"^^xsd:dateTime;
-                                                            ext:requester  ${sparqlEscapeUri(
-                                                              accountUri
-                                                            )};
-                                                            ext:person ${sparqlEscapeUri(
-                                                              `http://data.lblod.info/id/personen/${personId}`
-                                                            )} ;
-                                                            ext:code  ${sparqlEscapeUri(
-                                                              reasonCodeUri
-                                                            )}.
+        <http://data.lblod.info/id/person-information-reads/${reasonId}> a ext:PersonInformationRead;
+          mu:uuid "${reasonId}";
+          ext:date "${now}"^^xsd:dateTime;
+          ext:requester  ${sparqlEscapeUri(
+            accountUri
+          )};
+          ext:person ?person ;
+          ext:code  ${sparqlEscapeUri(
+            reasonCodeUri
+          )}.
+      }
+    } WHERE {
+      ?person mu:uuid ${sparqlEscapeString(personId)} .
     }
-  }
-    
   `;
 }
+
 export function insertDataPerson(
   graph,
   accountUri,
@@ -233,12 +234,10 @@ export function insertDataPerson(
     query = `
     ${query}
     <http://data.lblod.info/id/geboortes/${dateOfBirthId}>  a persoon:Geboorte;
-                            mu:uuid "${dateOfBirthId}";
-                            persoon:datum ${sparqlEscapeDate(dateOfBirth)}.
+      mu:uuid "${dateOfBirthId}";
+      persoon:datum ${sparqlEscapeDate(dateOfBirth)}.
 
-    ${sparqlEscapeUri(
-      `http://data.lblod.info/id/personen/${personId}`
-    )}  persoon:heeftGeboorte <http://data.lblod.info/id/geboortes/${dateOfBirthId}>.
+    ?person persoon:heeftGeboorte <http://data.lblod.info/id/geboortes/${dateOfBirthId}>.
 
     <http://data.lblod.info/id/person-information-updates/${reasonId}>  persoon:heeftGeboorte <http://data.lblod.info/id/geboortes/${dateOfBirthId}>.
 
@@ -258,29 +257,23 @@ export function insertDataPerson(
       )}.
 
       <http://data.lblod.info/id/identificatoren/${registrationId}> a <http://www.w3.org/ns/adms#Identifier>;
-                  mu:uuid "${registrationId}";
-                  <http://www.w3.org/2004/02/skos/core#notation> "Rijksregisternummer";
-                  <https://data.vlaanderen.be/ns/generiek#gestructureerdeIdentificator> <http://data.lblod.info/id/gestructureerdeIdentificatoren/${gestId}>.
+        mu:uuid "${registrationId}";
+        <http://www.w3.org/2004/02/skos/core#notation> "Rijksregisternummer";
+        <https://data.vlaanderen.be/ns/generiek#gestructureerdeIdentificator> <http://data.lblod.info/id/gestructureerdeIdentificatoren/${gestId}>.
 
-      ${sparqlEscapeUri(
-        `http://data.lblod.info/id/personen/${personId}`
-      )}  persoon:registratie <http://data.lblod.info/id/identificatoren/${registrationId}>.
+      ?person persoon:registratie <http://data.lblod.info/id/identificatoren/${registrationId}>.
 
       <http://data.lblod.info/id/person-information-updates/${reasonId}>  persoon:registratie <http://data.lblod.info/id/identificatoren/${registrationId}>.
-
     `;
   }
 
   if (gender) {
     query = `
       ${query}
-      ${sparqlEscapeUri(
-        `http://data.lblod.info/id/personen/${personId}`
-      )}  persoon:geslacht ${sparqlEscapeUri(gender)}.
-      <http://data.lblod.info/id/person-information-updates/${reasonId}>  persoon:geslacht ${sparqlEscapeUri(
+      ?person persoon:geslacht ${sparqlEscapeUri(gender)}.
+      <http://data.lblod.info/id/person-information-updates/${reasonId}> persoon:geslacht ${sparqlEscapeUri(
       gender
     )}.
-    
     `;
   }
 
@@ -288,14 +281,10 @@ export function insertDataPerson(
     let nationalitiesSubQuery = nationalities
       .map((nationality) => {
         return `
-      ${sparqlEscapeUri(
-        `http://data.lblod.info/id/personen/${personId}`
-      )}  persoon:heeftNationaliteit  ${sparqlEscapeUri(nationality)}.
-      <http://data.lblod.info/id/person-information-updates/${reasonId}>  persoon:heeftNationaliteit  ${sparqlEscapeUri(
+      ?person persoon:heeftNationaliteit ${sparqlEscapeUri(nationality)}.
+      <http://data.lblod.info/id/person-information-updates/${reasonId}> persoon:heeftNationaliteit ${sparqlEscapeUri(
           nationality
         )}.
-
-
       `;
       })
       .join("");
@@ -304,25 +293,24 @@ export function insertDataPerson(
       ${query}
 
       ${nationalitiesSubQuery}
-    
     `;
   }
 
   return `
   ${PREFIXES}
-  INSERT DATA {
+  INSERT {
     GRAPH ${sparqlEscapeUri(graph)} {
       <http://data.lblod.info/id/person-information-updates/${reasonId}>  a ext:PersonInformationUpdate;
       mu:uuid "${reasonId}";
       ext:date "${now}"^^xsd:dateTime;
       ext:requester  ${sparqlEscapeUri(accountUri)};
-      ext:person ${sparqlEscapeUri(
-        `http://data.lblod.info/id/personen/${personId}`
-      )};
-      ext:code   ${sparqlEscapeUri(reasonCodeUri)}.
-        ${query}
+      ext:person ?person ;
+      ext:code ${sparqlEscapeUri(reasonCodeUri)} .
 
+      ${query}
     }
-    }
+  } WHERE {
+    ?person mu:uuid ${sparqlEscapeString(personId)} .
+  }
   `;
 }
