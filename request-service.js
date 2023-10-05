@@ -9,7 +9,9 @@ import {
   getReasonById,
   requestReadReason,
   getNationalityById,
-  getPersonInfo,
+  getPersonBirth,
+  getPersonRegistrationNumber,
+  getPersonGender,
   getPersonNationalities,
   insertDataPerson,
 } from "./queries";
@@ -183,20 +185,48 @@ export class RequestService {
       appGraph: APP_GRAPH_URI,
       personId,
     };
-    let getPersonInfoQuery = getPersonInfo(
+
+    // Splitting for performances reasons
+
+    let getPersonBirthQuery = getPersonBirth(
       queryParameters.graph,
       queryParameters.appGraph,
       queryParameters.personId
     );
 
-    let queryResult = await query(getPersonInfoQuery);
+    let queryResultBirth = await query(getPersonBirthQuery);
 
-    if (queryResult.results.bindings.length) {
-      const result = queryResult.results.bindings[0];
+    if (queryResultBirth.results.bindings.length) {
+      const result = queryResultBirth.results.bindings[0];
       responseBuilder.dateOfBirth = result.dateOfBirth?.value;
+    }
+
+    let getPersonRegistrationNumberQuery = getPersonRegistrationNumber(
+      queryParameters.graph,
+      queryParameters.appGraph,
+      queryParameters.personId
+    );
+
+    let queryResultRegistrationNumber = await query(getPersonRegistrationNumberQuery);
+
+    if (queryResultRegistrationNumber.results.bindings.length) {
+      const result = queryResultRegistrationNumber.results.bindings[0];
       responseBuilder.registrationNumber = result.registrationNumber?.value;
+    }
+
+    let getPersonGenderQuery = getPersonGender(
+      queryParameters.graph,
+      queryParameters.appGraph,
+      queryParameters.personId
+    );
+
+    let queryResultGender = await query(getPersonGenderQuery);
+
+    if (queryResultGender.results.bindings.length) {
+      const result = queryResultGender.results.bindings[0];
       responseBuilder.genderId = result.genderId?.value;
     }
+
     let getPersonNationalitiesQuery = getPersonNationalities(
       queryParameters.graph,
       queryParameters.appGraph,
@@ -206,6 +236,7 @@ export class RequestService {
     responseBuilder.nationalities = queryResultNationalities.results.bindings
       .map((n) => n.nationaliteitId?.value)
       .filter((n) => n?.length > 0);
+
     return responseBuilder;
   }
 
